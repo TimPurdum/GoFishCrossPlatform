@@ -25,7 +25,7 @@ namespace GoFish
 
                 Deck.Deal(new List<Player>{Player, AI}, 5);
 
-                while (Player.Hand.Count > 0 && AI.Hand.Count > 0)
+                while (Player.Hand.Count > 0 && AI.Hand.Count > 0 && Deck.Count > 0)
                 {
                     ShowHand();
                     Guess();
@@ -52,18 +52,26 @@ namespace GoFish
 
         static void Guess()
         {
+            if (Player.Hand.Count == 0)
+            {
+                Console.WriteLine("No cards, you must draw this turn!");
+                Deck.Draw(Player, 1);
+                return;
+            }
+            
             Console.WriteLine();
             Console.WriteLine("Ask me if I have a card...");
-            Console.WriteLine("(Use the format like 'ten of spades')");
+            Console.WriteLine("(e.g., Ace, Two, Three, Four, King...)");
             var guess = Console.ReadLine();
             Console.WriteLine();
             var card = FindCard(guess, AI);
             
             if (card.HasValue)
             {
-                Console.WriteLine($"You got the {guess}!");
+                Console.WriteLine($"You got the {card.Value.Name} of {card.Value.Suit.Name}!");
                 Player.Hand.Add(card.Value);
                 AI.Hand.Remove(card.Value);
+                Guess();
             }
             else
             {
@@ -77,22 +85,30 @@ namespace GoFish
 
         static void AIGuess()
         {
+            if (AI.Hand.Count == 0)
+            {
+                Console.WriteLine("No cards, I must draw this turn!");
+                Deck.Draw(AI, 1);
+                return;
+            }
+            
             var guessDeck = new Deck();
             guessDeck.Shuffle();
             var guessCard = guessDeck.Peek();
             Console.WriteLine();
             Console.WriteLine("My turn.");
-            var guess = $"{guessCard.Name} of {guessCard.Suit.Name}";
-            Console.WriteLine($"Do you have the {guess}?");
+            var guess = guessCard.Name == "Six" ? guessCard.Name + "es" : guessCard.Name + "s";
+            Console.WriteLine($"Do you have any {guess}?");
             Thread.Sleep(2000);
             Console.WriteLine();
-            var card = FindCard(guess, Player);
+            var card = FindCard(guessCard.Name, Player);
             
             if (card.HasValue)
             {
-                Console.WriteLine($"Yes? I'll take that {guess}!");
+                Console.WriteLine($"Yes? I'll take that {guessCard.Name}!");
                 AI.Hand.Add(card.Value);
                 Player.Hand.Remove(card.Value);
+                AIGuess();
             }
             else
             {
@@ -104,21 +120,13 @@ namespace GoFish
 
         static Card? FindCard(string guess, Player p)
         {
-            var words = guess.Split(" ");
-            
-            if (words.Length > 2)
-            {
-                var cardName = words[0].ToLower();
-                var suitName = words[2].ToLower();
-                    
-                if (p.Hand.Any(c =>
-                    c.Name.ToLower() == cardName && c.Suit.Name.ToLower() == suitName))
-                {
-                    return p.Hand.First(c =>
-                        c.Name.ToLower() == cardName && c.Suit.Name.ToLower() == suitName);
-                }
-            }
+            var cardGuess = guess.Trim();
 
+            if (p.Hand.Any(c => c.Name.ToLower() == cardGuess))
+            {
+                return p.Hand.First(c => c.Name.ToLower() == cardGuess);
+            }
+           
             return null;
         }
         
@@ -127,71 +135,10 @@ namespace GoFish
         {
             Console.WriteLine();
             
-            FindSequences(p);
-
-            FindThreeOrFourOfAKind(p);
-
-            if (p.Sets.Count == 0)
-            {
-                return;
-            }
-
-            AddToExistingSets(p);
-
-            ShowSets(p);
-        }
-
-
-        static void FindSequences(Player p)
-        {
-            var suitGroups = p.Hand.GroupBy(c => c.Suit);
-            foreach (var suitGroup in suitGroups)
-            {
-                if (suitGroup.Count() > 2)
-                {
-                    var suitCards = suitGroup.ToArray().OrderBy(c => c.Number).ToArray();
-                    var sequentialCards = new List<Card>{suitCards[0]};
-                    foreach (var card in suitCards)
-                    {
-                        if (card.Number == sequentialCards.Last().Number + 1)
-                        {
-                            sequentialCards.Add(card);
-                        }
-                        else
-                        {
-                            if (sequentialCards.Count > 2)
-                            {
-                                // save
-                                p.Sets.Add(new MatchingSet(sequentialCards));
-                                foreach (var c in sequentialCards)
-                                {
-                                    p.Hand.Remove(c);
-                                }
-                            }
-                            // empty and start over
-                            sequentialCards = new List<Card>{card};
-                        }
-                    }
-                    if (sequentialCards.Count > 2)
-                    {
-                        // save
-                        p.Sets.Add(new MatchingSet(sequentialCards));
-                        foreach (var c in sequentialCards)
-                        {
-                            p.Hand.Remove(c);
-                        }
-                    }
-                } 
-            }
-        }
-
-
-        static void FindThreeOrFourOfAKind(Player p)
-        {
             var numberGroups = p.Hand.GroupBy(c => c.Number);
             foreach (var numberGroup in numberGroups)
             {
-                if (numberGroup.Count() > 2)
+                if (numberGroup.Count() == 4)
                 {
                     var numberCards = numberGroup.ToArray();
                     p.Sets.Add(new MatchingSet(numberCards));
@@ -201,42 +148,13 @@ namespace GoFish
                     }
                 }
             }
-        }
-
-
-        static void AddToExistingSets(Player p)
-        {
-            foreach (var set in p.Sets)
+            
+            if (p.Sets.Count == 0)
             {
-                // 3 of a kind sets
-                if (set.Cards.GroupBy(c => c.Number).Count() == 1)
-                {
-                    var setNumber = set.Cards.First().Number;
-                    if (set.Cards.Count == 3 && p.Hand.Any(c => c.Number == setNumber))
-                    {
-                        var newCard = p.Hand.Single(c => c.Number == setNumber);
-                        set.AddCard(newCard);
-                        p.Hand.Remove(newCard);
-                    }
-                }
-                else
-                {
-                    var suit = set.Cards.First().Suit;
-                    if (p.Hand.Any(c => c.Suit == suit))
-                    {
-                        var suitCards = p.Hand.Where(c => c.Suit == suit).ToArray();
-                        foreach (var suitCard in suitCards)
-                        {
-                            if (set.Cards.Any(c =>
-                                c.Number == suitCard.Number - 1 || c.Number == suitCard.Number + 1))
-                            {
-                                set.AddCard(suitCard);
-                                p.Hand.Remove(suitCard);
-                            }
-                        }
-                    }
-                }
+                return;
             }
+
+            ShowSets(p);
         }
 
 
@@ -253,11 +171,12 @@ namespace GoFish
             
             foreach (var set in p.Sets)
             {
-                Console.WriteLine("Set:");
-                foreach (var card in set.Cards)
+                var setName = set.Cards.First().Name;
+                if (setName == "Six")
                 {
-                    Console.WriteLine($"- {card.Name} of {card.Suit.Name}");
+                    setName = "Sixe";
                 }
+                Console.WriteLine($" - {setName}s");
             }
         }
 
