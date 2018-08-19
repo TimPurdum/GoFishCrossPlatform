@@ -24,5 +24,22 @@ namespace GoFish
         {
             return s1.Name != s2.Name;
         }
+
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Suit s2)
+            {
+                return Name == s2.Name;    
+            }
+
+            return false;
+        }
+
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }
