@@ -12,5 +12,19 @@ namespace GoFish
             Number = number;
             Name = name;
         }
+
+
+        public string PluralName
+        {
+            get
+            {
+                if (Name == "Six")
+                {
+                    return Name + "es";
+                }
+
+                return Name + "s";   
+            }
+        }
     }
 }

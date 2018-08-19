@@ -10,28 +10,24 @@ namespace GoFish
     class Program
     {
         static readonly Deck Deck = new Deck();
-        static readonly Player AI = new Player(){AI = true};
+        static readonly Player AI = new Player();
         static readonly Player Player = new Player();
-        static void Main(string[] args)
+        static void Main()
         {
-            Console.WriteLine("Let's play Go Fish! What's your name?");
-            Player.Name = Console.ReadLine();
-            Console.WriteLine($"Welcome, {Player.Name}! My name is {AI.Name}.");
+            Console.WriteLine("Let's play Go Fish!");
             Console.WriteLine("Type the letter 's' to shuffle the deck.");
             if (Console.ReadLine()?.ToLower() == "s")
             {
                 Console.WriteLine("Shuffling...");
                 Deck.Shuffle();
-
+                Console.WriteLine();
                 Deck.Deal(new List<Player>{Player, AI}, 5);
 
                 while (Player.Hand.Count > 0 && AI.Hand.Count > 0 && Deck.Count > 0)
                 {
                     ShowHand();
                     Guess();
-                    LayoutSets(Player);
                     AIGuess();
-                    LayoutSets(AI);
                 }
 
                 GameOver();
@@ -40,7 +36,6 @@ namespace GoFish
 
         static void ShowHand()
         {
-            Console.WriteLine();
             Console.WriteLine("Here is your hand:");
             foreach (var card in Player.Hand)
             {
@@ -63,22 +58,42 @@ namespace GoFish
             Console.WriteLine("Ask me if I have a card...");
             Console.WriteLine("(e.g., Ace, Two, Three, Four, King...)");
             var guess = Console.ReadLine();
-            Console.WriteLine();
-            var card = FindCard(guess, AI);
-            
-            if (card.HasValue)
+
+            while (Player.Hand.All(c => c.Name.ToLower() != guess?.ToLower()))
             {
-                Console.WriteLine($"You got the {card.Value.Name} of {card.Value.Suit.Name}!");
-                Player.Hand.Add(card.Value);
-                AI.Hand.Remove(card.Value);
+                Console.WriteLine("You may only guess card numbers that you already have.");
+                Console.WriteLine("Ask me if I have a card...");
+                guess = Console.ReadLine();
+            }
+            
+            Console.WriteLine();
+            var cards = FindCards(guess, AI);
+            
+            if (cards != null)
+            {
+                var message = $"You got {cards.Count} {cards.First().Name}!";
+                if (cards.Count > 1)
+                {
+                    message = $"You got {cards.Count} {cards.First().PluralName}!";
+                }
+                Console.WriteLine(message);
+                
+                Player.Hand.AddRange(cards);
+                foreach (var c in cards)
+                {
+                    AI.Hand.Remove(c);
+                }
+                LayoutSets(Player);
                 Guess();
             }
             else
             {
                 Console.WriteLine("No! Go Fish!");
+                Thread.Sleep(1000);
                 Deck.Draw(Player, 1);
                 var newCard = Player.Hand.Last();
                 Console.WriteLine($"You drew the {newCard.Name} of {newCard.Suit.Name}");
+                LayoutSets(Player);
             }
         }
 
@@ -95,36 +110,56 @@ namespace GoFish
             var guessDeck = new Deck();
             guessDeck.Shuffle();
             var guessCard = guessDeck.Peek();
-            Console.WriteLine();
+            while (AI.Hand.All(c => c.Number != guessCard.Number))
+            {
+                guessDeck.Remove(guessCard);
+                guessDeck.Shuffle();
+                guessCard = guessDeck.Peek();
+            }
+            
             Console.WriteLine("My turn.");
-            var guess = guessCard.Name == "Six" ? guessCard.Name + "es" : guessCard.Name + "s";
-            Console.WriteLine($"Do you have any {guess}?");
+            
+            Console.WriteLine($"Do you have any {guessCard.PluralName}?");
             Thread.Sleep(2000);
             Console.WriteLine();
-            var card = FindCard(guessCard.Name, Player);
+            var cards = FindCards(guessCard.Name, Player);
             
-            if (card.HasValue)
+            if (cards != null)
             {
-                Console.WriteLine($"Yes? I'll take that {guessCard.Name}!");
-                AI.Hand.Add(card.Value);
-                Player.Hand.Remove(card.Value);
+                if (cards.Count == 1)
+                {
+                    Console.WriteLine($"Yes? I'll take that {guessCard.Name}!");
+                }
+                else
+                {
+                    Console.WriteLine($"Yes? I'll take those {guessCard.PluralName}!");
+                }
+                
+                AI.Hand.AddRange(cards);
+                foreach (var c in cards)
+                {
+                    Player.Hand.Remove(c);
+                }
+                LayoutSets(AI);
                 AIGuess();
             }
             else
             {
                 Console.WriteLine("No? I have to draw...");
+                Thread.Sleep(1000);
                 Deck.Draw(AI, 1);
+                LayoutSets(AI);
             }
         }
 
 
-        static Card? FindCard(string guess, Player p)
+        static List<Card> FindCards(string guess, Player p)
         {
             var cardGuess = guess.Trim().ToLower();
 
             if (p.Hand.Any(c => c.Name.ToLower() == cardGuess))
             {
-                return p.Hand.First(c => c.Name.ToLower() == cardGuess);
+                return p.Hand.Where(c => c.Name.ToLower() == cardGuess).ToList();
             }
            
             return null;
@@ -171,12 +206,12 @@ namespace GoFish
             
             foreach (var set in p.Sets)
             {
-                var setName = set.Cards.First().Name;
-                if (setName == "Six")
-                {
-                    setName = "Sixe";
-                }
-                Console.WriteLine($" - {setName}s");
+                Console.WriteLine($" - {set.Cards.First().PluralName}");
+            }
+
+            if (p == Player)
+            {
+                ShowHand();
             }
         }
 
