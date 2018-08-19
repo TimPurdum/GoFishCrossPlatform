@@ -120,7 +120,7 @@ namespace GoFish
 
         static Card? FindCard(string guess, Player p)
         {
-            var cardGuess = guess.Trim();
+            var cardGuess = guess.Trim().ToLower();
 
             if (p.Hand.Any(c => c.Name.ToLower() == cardGuess))
             {
