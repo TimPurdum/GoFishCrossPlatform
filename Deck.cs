@@ -7,18 +7,12 @@ namespace GoFish
 {
     public class Deck : List<Card>
     {
-        readonly string[] CardNames =
-        {
-            "Ace", "Two", "Three", "Four", "Five", "Six", "Seven",
-            "Eight", "Nine", "Ten", "Jack", "Queen", "King"
-        };
-
         readonly Suit[] suits =
         {
-            new Suit("Hearts", "red"),
-            new Suit("Diamonds", "red"),
-            new Suit("Clubs", "black"),
-            new Suit("Spades", "black")
+            Suit.Hearts,
+            Suit.Clubs,
+            Suit.Diamonds,
+            Suit.Spades
         };
 
         public Deck()
@@ -27,7 +21,7 @@ namespace GoFish
             {
                 foreach (var suit in suits)
                 {
-                    Add(new Card(suit, i + 1, CardNames[i]));
+                    Add(new Card(suit, (Rank)i));
                 }
             }
         }

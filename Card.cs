@@ -3,14 +3,12 @@ namespace GoFish
     public struct Card
     {
         public Suit Suit;
-        public int Number;
-        public string Name;
+        public Rank Rank;
         
-        public Card (Suit suit, int number, string name)
+        public Card (Suit suit, Rank rank)
         {
             Suit = suit;
-            Number = number;
-            Name = name;
+            Rank = rank;
         }
 
 
@@ -18,12 +16,12 @@ namespace GoFish
         {
             get
             {
-                if (Name == "Six")
+                if (Rank == Rank.Six)
                 {
-                    return Name + "es";
+                    return Rank + "es";
                 }
 
-                return Name + "s";   
+                return Rank + "s";   
             }
         }
     }

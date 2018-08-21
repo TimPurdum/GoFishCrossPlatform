@@ -39,7 +39,7 @@ namespace GoFish
             Console.WriteLine("Here is your hand:");
             foreach (var card in Player.Hand)
             {
-                Console.WriteLine($" - {card.Name} of {card.Suit.Name}");
+                Console.WriteLine($" - {card.Rank} of {card.Suit}");
             }
             
         }
@@ -59,7 +59,7 @@ namespace GoFish
             Console.WriteLine("(e.g., Ace, Two, Three, Four, King...)");
             var guess = Console.ReadLine();
 
-            while (Player.Hand.All(c => c.Name.ToLower() != guess?.ToLower()))
+            while (Player.Hand.All(c => c.Rank.ToString().ToLower() != guess?.ToLower()))
             {
                 Console.WriteLine("You may only guess card numbers that you already have.");
                 Console.WriteLine("Ask me if I have a card...");
@@ -71,7 +71,7 @@ namespace GoFish
             
             if (cards != null)
             {
-                var message = $"You got {cards.Count} {cards.First().Name}!";
+                var message = $"You got {cards.Count} {cards.First().Rank}!";
                 if (cards.Count > 1)
                 {
                     message = $"You got {cards.Count} {cards.First().PluralName}!";
@@ -92,7 +92,7 @@ namespace GoFish
                 Thread.Sleep(1000);
                 Deck.Draw(Player, 1);
                 var newCard = Player.Hand.Last();
-                Console.WriteLine($"You drew the {newCard.Name} of {newCard.Suit.Name}");
+                Console.WriteLine($"You drew the {newCard.Rank} of {newCard.Suit}");
                 LayoutSets(Player);
             }
         }
@@ -110,7 +110,7 @@ namespace GoFish
             var guessDeck = new Deck();
             guessDeck.Shuffle();
             var guessCard = guessDeck.Peek();
-            while (AI.Hand.All(c => c.Number != guessCard.Number))
+            while (AI.Hand.All(c => c.Rank != guessCard.Rank))
             {
                 guessDeck.Remove(guessCard);
                 guessDeck.Shuffle();
@@ -122,13 +122,13 @@ namespace GoFish
             Console.WriteLine($"Do you have any {guessCard.PluralName}?");
             Thread.Sleep(2000);
             Console.WriteLine();
-            var cards = FindCards(guessCard.Name, Player);
+            var cards = FindCards(guessCard.Rank.ToString(), Player);
             
             if (cards != null)
             {
                 if (cards.Count == 1)
                 {
-                    Console.WriteLine($"Yes? I'll take that {guessCard.Name}!");
+                    Console.WriteLine($"Yes? I'll take that {guessCard.Rank}!");
                 }
                 else
                 {
@@ -157,9 +157,9 @@ namespace GoFish
         {
             var cardGuess = guess.Trim().ToLower();
 
-            if (p.Hand.Any(c => c.Name.ToLower() == cardGuess))
+            if (p.Hand.Any(c => c.Rank.ToString().ToLower() == cardGuess))
             {
-                return p.Hand.Where(c => c.Name.ToLower() == cardGuess).ToList();
+                return p.Hand.Where(c => c.Rank.ToString().ToLower() == cardGuess).ToList();
             }
            
             return null;
@@ -170,7 +170,7 @@ namespace GoFish
         {
             Console.WriteLine();
             
-            var numberGroups = p.Hand.GroupBy(c => c.Number);
+            var numberGroups = p.Hand.GroupBy(c => c.Rank);
             foreach (var numberGroup in numberGroups)
             {
                 if (numberGroup.Count() == 4)
