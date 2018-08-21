@@ -21,7 +21,7 @@ namespace GoFish
                 Console.WriteLine("Shuffling...");
                 Deck.Shuffle();
                 Console.WriteLine();
-                Deck.Deal(new List<Player>{Player, AI}, 5);
+                Deck.Deal(new List<Player>{Player, AI}, 7);
 
                 while (Player.Hand.Count > 0 && AI.Hand.Count > 0 && Deck.Count > 0)
                 {
