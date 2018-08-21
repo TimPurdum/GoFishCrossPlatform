@@ -1,10 +1,11 @@
 namespace GoFish
 {
-    public struct Card
+    public class Card
     {
-        public Suit Suit;
-        public Rank Rank;
-        
+        public Suit Suit { get; }
+        public Rank Rank { get; }
+
+
         public Card (Suit suit, Rank rank)
         {
             Suit = suit;
