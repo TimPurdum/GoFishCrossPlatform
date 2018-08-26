@@ -175,8 +175,8 @@ namespace GoFish
             {
                 if (numberGroup.Count() == 4)
                 {
-                    var numberCards = numberGroup.ToArray();
-                    p.Sets.Add(new MatchingSet(numberCards));
+                    var numberCards = numberGroup.ToList();
+                    p.Sets.Add(numberCards);
                     foreach (var c in numberCards)
                     {
                         p.Hand.Remove(c);
@@ -206,7 +206,7 @@ namespace GoFish
             
             foreach (var set in p.Sets)
             {
-                Console.WriteLine($" - {set.Cards.First().PluralName}");
+                Console.WriteLine($" - {set.First().PluralName}");
             }
 
             if (p == Player)
@@ -220,10 +220,10 @@ namespace GoFish
         {
             Console.WriteLine("Game Over!");
             var playerPoints = 0;
-            Player.Sets.ForEach(set => playerPoints += set.Cards.Count);
+            Player.Sets.ForEach(set => playerPoints += set.Count);
             Console.WriteLine($"Your score is {playerPoints}");
             var aiPoints = 0;
-            AI.Sets.ForEach(set => aiPoints += set.Cards.Count);
+            AI.Sets.ForEach(set => aiPoints += set.Count);
             Console.WriteLine($"My score is {aiPoints}");
             if (playerPoints > aiPoints)
             {

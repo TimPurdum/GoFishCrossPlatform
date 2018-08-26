@@ -8,6 +8,6 @@ namespace GoFish
     {
         public List<Card> Hand { get; set; }
         
-        public List<MatchingSet> Sets { get; } = new List<MatchingSet>();
+        public List<List<Card>> Sets { get; } = new List<List<Card>>();
     }
 }
