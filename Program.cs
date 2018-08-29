@@ -12,6 +12,7 @@ namespace GoFish
         static readonly Deck Deck = new Deck();
         static readonly Player AI = new Player();
         static readonly Player Player = new Player();
+        
         static void Main()
         {
             Console.WriteLine("Let's play Go Fish!");
@@ -23,7 +24,7 @@ namespace GoFish
                 Console.WriteLine();
                 Deck.Deal(new List<Player>{Player, AI}, 7);
 
-                while (Player.Hand.Count > 0 && AI.Hand.Count > 0 && Deck.Count > 0)
+                while (Player.Hand.Count > 0 || AI.Hand.Count > 0 && Deck.Count > 0)
                 {
                     ShowHand();
                     Guess();
@@ -41,7 +42,6 @@ namespace GoFish
             {
                 Console.WriteLine($" - {card.Rank} of {card.Suit}");
             }
-            
         }
 
 
@@ -107,15 +107,9 @@ namespace GoFish
                 return;
             }
             
-            var guessDeck = new Deck();
-            guessDeck.Shuffle();
-            var guessCard = guessDeck.Peek();
-            while (AI.Hand.All(c => c.Rank != guessCard.Rank))
-            {
-                guessDeck.Remove(guessCard);
-                guessDeck.Shuffle();
-                guessCard = guessDeck.Peek();
-            }
+            var randomGenerator = new Random();
+
+            var guessCard = AI.Hand[randomGenerator.Next(0, AI.Hand.Count - 1)];
             
             Console.WriteLine("My turn.");
             
