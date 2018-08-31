@@ -1,27 +1,33 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading;
 
 
-namespace GoFish
+namespace GoFish.Business
 {
-    class Program
+    public class Game
     {
-        static readonly Deck Deck = new Deck();
-        static readonly Player AI = new Player();
-        static readonly Player Player = new Player();
-        
-        static void Main()
+        readonly ICommunicator Communicator;
+        readonly Deck Deck = new Deck();
+        readonly Player AI = new Player();
+        readonly Player Player = new Player();
+
+        public Game(ICommunicator comm)
         {
-            Console.WriteLine("Let's play Go Fish!");
-            Console.WriteLine("Type the letter 's' to shuffle the deck.");
-            if (Console.ReadLine()?.ToLower() == "s")
+            Communicator = comm;
+        }
+
+
+        public void Start()
+        {
+            Communicator.Write("Let's play Go Fish!");
+            Communicator.Write("Type the letter 's' to shuffle the deck.");
+            if (Communicator.Read()?.ToLower() == "s")
             {
-                Console.WriteLine("Shuffling...");
+                Communicator.Write("Shuffling...");
                 Deck.Shuffle();
-                Console.WriteLine();
+                Communicator.Write("");
                 Deck.Deal(new List<Player>{Player, AI}, 7);
 
                 while (Player.Hand.Count > 0 || AI.Hand.Count > 0 && Deck.Count > 0)
@@ -34,39 +40,40 @@ namespace GoFish
                 GameOver();
             }
         }
-
-        static void ShowHand()
+        
+        
+        void ShowHand()
         {
-            Console.WriteLine("Here is your hand:");
+            Communicator.Write("Here is your hand:");
             foreach (var card in Player.Hand)
             {
-                Console.WriteLine($" - {card.Rank} of {card.Suit}");
+                Communicator.Write($" - {card.Rank} of {card.Suit}");
             }
         }
 
 
-        static void Guess()
+        void Guess()
         {
             if (Player.Hand.Count == 0)
             {
-                Console.WriteLine("No cards, you must draw this turn!");
-                Deck.Draw(Player, 1);
+                Communicator.Write("No cards, you must draw this turn!");
+                Deck.Draw(Player);
                 return;
             }
             
-            Console.WriteLine();
-            Console.WriteLine("Ask me if I have a card...");
-            Console.WriteLine("(e.g., Ace, Two, Three, Four, King...)");
-            var guess = Console.ReadLine();
+            Communicator.Write("");
+            Communicator.Write("Ask me if I have a card...");
+            Communicator.Write("(e.g., Ace, Two, Three, Four, King...)");
+            var guess = Communicator.Read();
 
             while (Player.Hand.All(c => c.Rank.ToString().ToLower() != guess?.ToLower()))
             {
-                Console.WriteLine("You may only guess card numbers that you already have.");
-                Console.WriteLine("Ask me if I have a card...");
-                guess = Console.ReadLine();
+                Communicator.Write("You may only guess card numbers that you already have.");
+                Communicator.Write("Ask me if I have a card...");
+                guess = Communicator.Read();
             }
             
-            Console.WriteLine();
+            Communicator.Write("");
             var cards = FindCards(guess, AI);
             
             if (cards != null)
@@ -76,7 +83,7 @@ namespace GoFish
                 {
                     message = $"You got {cards.Count} {cards.First().PluralName}!";
                 }
-                Console.WriteLine(message);
+                Communicator.Write(message);
                 
                 Player.Hand.AddRange(cards);
                 foreach (var c in cards)
@@ -88,22 +95,22 @@ namespace GoFish
             }
             else
             {
-                Console.WriteLine("No! Go Fish!");
+                Communicator.Write("No! Go Fish!");
                 Thread.Sleep(1000);
-                Deck.Draw(Player, 1);
+                Deck.Draw(Player);
                 var newCard = Player.Hand.Last();
-                Console.WriteLine($"You drew the {newCard.Rank} of {newCard.Suit}");
+                Communicator.Write($"You drew the {newCard.Rank} of {newCard.Suit}");
                 LayoutSets(Player);
             }
         }
 
 
-        static void AIGuess()
+        void AIGuess()
         {
             if (AI.Hand.Count == 0)
             {
-                Console.WriteLine("No cards, I must draw this turn!");
-                Deck.Draw(AI, 1);
+                Communicator.Write("No cards, I must draw this turn!");
+                Deck.Draw(AI);
                 return;
             }
             
@@ -111,22 +118,22 @@ namespace GoFish
 
             var guessCard = AI.Hand[randomGenerator.Next(0, AI.Hand.Count - 1)];
             
-            Console.WriteLine("My turn.");
+            Communicator.Write("My turn.");
             
-            Console.WriteLine($"Do you have any {guessCard.PluralName}?");
+            Communicator.Write($"Do you have any {guessCard.PluralName}?");
             Thread.Sleep(2000);
-            Console.WriteLine();
+            Communicator.Write("");
             var cards = FindCards(guessCard.Rank.ToString(), Player);
             
             if (cards != null)
             {
                 if (cards.Count == 1)
                 {
-                    Console.WriteLine($"Yes? I'll take that {guessCard.Rank}!");
+                    Communicator.Write($"Yes? I'll take that {guessCard.Rank}!");
                 }
                 else
                 {
-                    Console.WriteLine($"Yes? I'll take those {guessCard.PluralName}!");
+                    Communicator.Write($"Yes? I'll take those {guessCard.PluralName}!");
                 }
                 
                 AI.Hand.AddRange(cards);
@@ -139,9 +146,9 @@ namespace GoFish
             }
             else
             {
-                Console.WriteLine("No? I have to draw...");
+                Communicator.Write("No? I have to draw...");
                 Thread.Sleep(1000);
-                Deck.Draw(AI, 1);
+                Deck.Draw(AI);
                 LayoutSets(AI);
             }
         }
@@ -160,9 +167,9 @@ namespace GoFish
         }
         
         
-        static void LayoutSets(Player p)
+        void LayoutSets(Player p)
         {
-            Console.WriteLine();
+            Communicator.Write("");
             
             var numberGroups = p.Hand.GroupBy(c => c.Rank);
             foreach (var numberGroup in numberGroups)
@@ -187,20 +194,20 @@ namespace GoFish
         }
 
 
-        static void ShowSets(Player p)
+        void ShowSets(Player p)
         {
             if (p == Player)
             {
-                Console.WriteLine("You have these sets:");
+                Communicator.Write("You have these sets:");
             }
             else
             {
-                Console.WriteLine("I have these sets:");
+                Communicator.Write("I have these sets:");
             }
             
             foreach (var set in p.Sets)
             {
-                Console.WriteLine($" - {set.First().PluralName}");
+                Communicator.Write($" - {set.First().PluralName}");
             }
 
             if (p == Player)
@@ -210,26 +217,26 @@ namespace GoFish
         }
 
 
-        static void GameOver()
+        void GameOver()
         {
-            Console.WriteLine("Game Over!");
+            Communicator.Write("Game Over!");
             var playerPoints = 0;
             Player.Sets.ForEach(set => playerPoints += set.Count);
-            Console.WriteLine($"Your score is {playerPoints}");
+            Communicator.Write($"Your score is {playerPoints}");
             var aiPoints = 0;
             AI.Sets.ForEach(set => aiPoints += set.Count);
-            Console.WriteLine($"My score is {aiPoints}");
+            Communicator.Write($"My score is {aiPoints}");
             if (playerPoints > aiPoints)
             {
-                Console.WriteLine("You Win!");
+                Communicator.Write("You Win!");
             }
             else if (aiPoints > playerPoints)
             {
-                Console.WriteLine("I Win!");
+                Communicator.Write("I Win!");
             }
             else
             {
-                Console.WriteLine("Tie Game!");
+                Communicator.Write("Tie Game!");
             }
         }
     }

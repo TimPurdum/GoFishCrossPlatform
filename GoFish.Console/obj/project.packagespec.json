@@ -1,0 +1,47 @@
+﻿{
+  "version": "1.0.0",
+  "restore": {
+    "projectUniqueName": "C:\\Users\\tpurdum\\Projects\\GoFishCrossPlatform\\GoFish.Console\\GoFish.Console.csproj",
+    "projectName": "GoFish.Console",
+    "projectPath": "C:\\Users\\tpurdum\\Projects\\GoFishCrossPlatform\\GoFish.Console\\GoFish.Console.csproj",
+    "outputPath": "C:\\Users\\tpurdum\\Projects\\GoFishCrossPlatform\\GoFish.Console\\obj\\",
+    "projectStyle": "PackageReference",
+    "fallbackFolders": [
+      "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+    ],
+    "originalTargetFrameworks": [
+      "netcoreapp2.1"
+    ],
+    "frameworks": {
+      "netcoreapp2.1": {
+        "projectReferences": {
+          "C:\\Users\\tpurdum\\Projects\\GoFishCrossPlatform\\GoFish.Business\\GoFish.Business.csproj": {
+            "projectPath": "C:\\Users\\tpurdum\\Projects\\GoFishCrossPlatform\\GoFish.Business\\GoFish.Business.csproj"
+          }
+        }
+      }
+    },
+    "warningProperties": {
+      "warnAsError": [
+        "NU1605"
+      ]
+    }
+  },
+  "frameworks": {
+    "netcoreapp2.1": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "suppressParent": "All",
+          "target": "Package",
+          "version": "[2.1.0, )",
+          "autoReferenced": true
+        }
+      },
+      "imports": [
+        "net461"
+      ],
+      "assetTargetFallback": true,
+      "warn": true
+    }
+  }
+}

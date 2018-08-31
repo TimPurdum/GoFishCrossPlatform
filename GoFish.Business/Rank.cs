@@ -1,4 +1,4 @@
-﻿namespace GoFish
+﻿namespace GoFish.Business
 {
     public enum Rank
     {

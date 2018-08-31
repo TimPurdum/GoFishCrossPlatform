@@ -1,0 +1,14 @@
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Console\obj\Debug\netcoreapp2.1\GoFish.Console.csprojAssemblyReference.cache
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Console\obj\Debug\netcoreapp2.1\GoFish.Console.csproj.CoreCompileInputs.cache
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Console\obj\Debug\netcoreapp2.1\GoFish.Console.AssemblyInfoInputs.cache
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Console\obj\Debug\netcoreapp2.1\GoFish.Console.AssemblyInfo.cs
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Console\bin\Debug\netcoreapp2.1\GoFish.Console.deps.json
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Console\bin\Debug\netcoreapp2.1\GoFish.Console.runtimeconfig.json
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Console\bin\Debug\netcoreapp2.1\GoFish.Console.runtimeconfig.dev.json
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Console\bin\Debug\netcoreapp2.1\GoFish.Console.dll
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Console\bin\Debug\netcoreapp2.1\GoFish.Console.pdb
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Console\bin\Debug\netcoreapp2.1\GoFish.Business.dll
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Console\bin\Debug\netcoreapp2.1\GoFish.Business.pdb
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Console\obj\Debug\netcoreapp2.1\GoFish.Console.csproj.CopyComplete
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Console\obj\Debug\netcoreapp2.1\GoFish.Console.dll
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Console\obj\Debug\netcoreapp2.1\GoFish.Console.pdb

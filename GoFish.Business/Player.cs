@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 
-namespace GoFish
+
+namespace GoFish.Business
 {
     public class Player
     {

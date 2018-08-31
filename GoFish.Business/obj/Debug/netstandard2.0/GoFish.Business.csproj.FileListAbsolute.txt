@@ -1,0 +1,9 @@
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Business\bin\Debug\netstandard2.0\GoFish.Business.deps.json
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Business\bin\Debug\netstandard2.0\GoFish.Business.dll
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Business\bin\Debug\netstandard2.0\GoFish.Business.pdb
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Business\obj\Debug\netstandard2.0\GoFish.Business.csprojAssemblyReference.cache
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Business\obj\Debug\netstandard2.0\GoFish.Business.csproj.CoreCompileInputs.cache
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Business\obj\Debug\netstandard2.0\GoFish.Business.AssemblyInfoInputs.cache
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Business\obj\Debug\netstandard2.0\GoFish.Business.AssemblyInfo.cs
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Business\obj\Debug\netstandard2.0\GoFish.Business.dll
+C:\Users\tpurdum\Projects\GoFishCrossPlatform\GoFish.Business\obj\Debug\netstandard2.0\GoFish.Business.pdb

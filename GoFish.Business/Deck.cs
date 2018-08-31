@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GoFish
+
+namespace GoFish.Business
 {
     public class Deck : List<Card>
     {

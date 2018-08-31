@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="\4e278903" t="IncludeRecursive" />
+    <e p="\app" t="IncludeRecursive" />
+    <e p="C:\Users\tpurdum\.Rider2018.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\tpurdum\.Rider2018.2\system\resharper-host\local\Transient\ReSharperHost\v182\SolutionCaches\_GoFish.1595600115.00" t="ExcludeRecursive" />
+    <e p="C:\Users\tpurdum\Projects\GoFishCrossPlatform" t="IncludeFlat">
+      <e p="GoFish.Business" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="Card.cs" t="Include" />
+        <e p="Deck.cs" t="Include" />
+        <e p="Game.cs" t="Include" />
+        <e p="GoFish.Business.csproj" t="IncludeRecursive" />
+        <e p="ICommunicator.cs" t="Include" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netstandard2.0" t="Include">
+              <e p="GoFish.Business.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="Player.cs" t="Include" />
+        <e p="Rank.cs" t="Include" />
+        <e p="README.md" t="Include" />
+        <e p="Suit.cs" t="Include" />
+      </e>
+      <e p="GoFish.Console" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="ConsoleCommunicator.cs" t="Include" />
+        <e p="GoFish.Console.csproj" t="IncludeRecursive" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp2.1" t="Include">
+              <e p="GoFish.Console.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="Program.cs" t="Include" />
+      </e>
+      <e p="GoFish.sln" t="IncludeFlat" />
+      <e p="packages" t="ExcludeRecursive" />
+    </e>
+  </component>
+</project>

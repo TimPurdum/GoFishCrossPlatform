@@ -1,0 +1,36 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v2.1",
+    "signature": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v2.1": {
+      "GoFish.Console/1.0.0": {
+        "dependencies": {
+          "GoFish.Business": "1.0.0"
+        },
+        "runtime": {
+          "GoFish.Console.dll": {}
+        }
+      },
+      "GoFish.Business/1.0.0": {
+        "runtime": {
+          "GoFish.Business.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "GoFish.Console/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "GoFish.Business/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
