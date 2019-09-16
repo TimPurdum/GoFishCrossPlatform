@@ -16,6 +16,7 @@ namespace GoFish.Console
             System.Console.OutputEncoding = Encoding.UTF8;
         }
         
+        
         public Task StartGame()
         {
             System.Console.Clear();
@@ -51,21 +52,7 @@ namespace GoFish.Console
             return Task.CompletedTask;
         }
 
-
-        private void DrawAi(Player aiPlayer, int i)
-        {
-            if (aiPlayer.Sets.Any())
-            {
-                System.Console.WriteLine("My Sets:");
-                System.Console.WriteLine(
-                    "-------------------------------------------------------------------------");
-                DrawSets(aiPlayer.Sets.ToArray());
-                System.Console.WriteLine(
-                    "-------------------------------------------------------------------------");
-            }
-        }
-
-
+        
         public Task MustDraw(string player)
         {
             System.Console.WriteLine($"Go Fish! {player} must draw a card!");
@@ -137,15 +124,10 @@ namespace GoFish.Console
 
         public Task EndGame(string message)
         {
-            throw new NotImplementedException();
+            System.Console.WriteLine(message);
+            return Task.CompletedTask;
         }
-
-
-        public event EventHandler<RankEventArgs> PlayerRequestsRank;
-        public event EventHandler<MessageEventArgs> CardsReturned;
-        public event EventHandler<MessageEventArgs> PlayerDraws;
-        public event EventHandler StartNewGame;
-
+        
 
         public Task InvalidCardRequest()
         {
@@ -163,16 +145,20 @@ namespace GoFish.Console
             CardsReturned?.Invoke(this, new MessageEventArgs(response));
             return Task.CompletedTask;
         }
+        
+        
+        public event EventHandler<RankEventArgs> PlayerRequestsRank;
+        public event EventHandler<MessageEventArgs> CardsReturned;
+        public event EventHandler<MessageEventArgs> PlayerDraws;
+        public event EventHandler StartNewGame;
 
 
         private static void DrawPlayer(Player player, int i)
         {
             System.Console.WriteLine($"Player {i} Hand:");
-            System.Console.WriteLine(
-                "-------------------------------------------------------------------------");
+            System.Console.WriteLine(Divider);
             DrawHand(player.Hand.ToArray());
-            System.Console.WriteLine(
-                "-------------------------------------------------------------------------");
+            System.Console.WriteLine(Divider);
             
             if (!player.Sets.Any())
             {
@@ -180,14 +166,24 @@ namespace GoFish.Console
             }
 
             System.Console.WriteLine($"Player {i} Sets:");
-            System.Console.WriteLine(
-                "-------------------------------------------------------------------------");
+            System.Console.WriteLine(Divider);
             DrawSets(player.Sets.ToArray());
-            System.Console.WriteLine(
-                "-------------------------------------------------------------------------");
+            System.Console.WriteLine(Divider);
             System.Console.WriteLine();
         }
 
+        
+        private void DrawAi(Player aiPlayer, int i)
+        {
+            if (aiPlayer.Sets.Any())
+            {
+                System.Console.WriteLine("My Sets:");
+                System.Console.WriteLine(Divider);
+                DrawSets(aiPlayer.Sets.ToArray());
+                System.Console.WriteLine(Divider);
+            }
+        }
+        
 
         private static void DrawHand(Card[] hand)
         {
@@ -227,10 +223,9 @@ namespace GoFish.Console
 
         private static void DrawSets(List<Card>[] sets)
         {
+            // top row
             foreach (var set in sets)
             {
-                //top row
-                // top row
                 for (var i = 0; i < set.Count; i++)
                 {
                     if (i < set.Count - 1)
@@ -239,39 +234,55 @@ namespace GoFish.Console
                     }
                     else
                     {
-                        System.Console.Write(" ___");
+                        System.Console.Write(" ___   ");
                     }
                 }
+            }
 
-                System.Console.WriteLine();
+            System.Console.WriteLine();
 
-                // rank row
+            // rank row
+            foreach (var set in sets)
+            {
                 foreach (var card in set)
                 {
                     System.Console.Write($"|{card.RankShortName}");
                 }
 
-                System.Console.Write(" |");
-                System.Console.WriteLine();
+                System.Console.Write(" |  ");
+            }
 
-                // suit row
+            System.Console.WriteLine();
+
+            // suit row
+            foreach (var set in sets)
+            {
                 foreach (var card in set)
                 {
                     System.Console.Write($"|{card.SuitSymbol} ");
                 }
 
-                System.Console.Write(" |");
-                System.Console.WriteLine();
+                System.Console.Write(" |  ");
+            }
 
-                // bottom row
+            System.Console.WriteLine();
+
+            // bottom row
+            foreach (var set in sets)
+            {
                 for (var i = 0; i < set.Count; i++)
                 {
                     System.Console.Write("|__");
                 }
 
-                System.Console.Write("_|");
-                System.Console.WriteLine();
+                System.Console.Write("_|  ");
             }
+
+            System.Console.WriteLine();
         }
+
+
+        private const string Divider =
+            "--------------------------------------------------------------------------------------------------------------------------";
     }
 }

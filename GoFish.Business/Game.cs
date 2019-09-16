@@ -126,7 +126,10 @@ namespace GoFish.Business
         {
             _deck.Draw(p);
             var newCard = p.Hand.Last();
-            await _display.CardsFound(new[] {newCard}, p == _player ? "You": "I");
+            if (p == _player)
+            {
+                await _display.CardsFound(new[] {newCard}, "You");
+            }
             LayoutSets(p);
             if (!_deck.Any() || !p.Hand.Any())
             {
@@ -142,10 +145,20 @@ namespace GoFish.Business
 
         private async Task AiGuess()
         {
-            var randomGenerator = new Random();
+            var allRanks = _ai.Hand.Select(c => c.Rank).Distinct().ToArray();
+            var otherRanks = allRanks.Where(r => !_previousAiGuesses.Contains(r)).ToArray();
 
-            _guessRank = _ai.Hand[randomGenerator.Next(0, _ai.Hand.Count - 1)].Rank;
-
+            if (otherRanks.Any())
+            {
+                _guessRank = otherRanks.Last();
+                _previousAiGuesses.Add(_guessRank);
+            }
+            else
+            {
+                _guessRank = allRanks.First();
+                _previousAiGuesses = new List<Rank>();
+            }
+            
             await Task.Run(async () => { await _display.AIsTurn(_guessRank); });
         }
 
@@ -172,12 +185,13 @@ namespace GoFish.Business
 
             await _display.CardsFound(foundCards.ToArray(), "I");
 
+            LayoutSets(_ai);
             if (!_deck.Any() || !_ai.Hand.Any())
             {
                 await GameOver();
                 return;
             }
-
+            
             await _display.DrawTable(new[] {_player}, new[] {_ai});
             await AiGuess();
         }
@@ -216,6 +230,7 @@ namespace GoFish.Business
 
         private async Task GameOver()
         {
+            _tokenSource.Cancel();
             var sb = new StringBuilder("Game Over!");
             var playerPoints = 0;
             _player.Sets.ForEach(set => playerPoints += set.Count);
@@ -243,6 +258,7 @@ namespace GoFish.Business
         private readonly Deck _deck = new Deck();
         private readonly IDisplayAdapter _display;
         private Player _ai = new Player();
+        private List<Rank> _previousAiGuesses = new List<Rank>();
         private Rank _guessRank;
         private Player _player = new Player();
         private bool _playerTurnComplete;
