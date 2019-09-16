@@ -1,15 +1,15 @@
-﻿using System;
+﻿using System.Threading.Tasks;
 using GoFish.Business;
 
 
 namespace GoFish.Console
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
-            var game = new Game(new ConsoleCommunicator());
-            game.Start();
+            var game = new Game(new ConsoleDisplayAdapter());
+            await game.StartGame();
         }
     }
 }

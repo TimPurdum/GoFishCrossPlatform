@@ -7,17 +7,9 @@ namespace GoFish.Business
 {
     public class Deck : List<Card>
     {
-        readonly Suit[] suits =
-        {
-            Suit.Hearts,
-            Suit.Clubs,
-            Suit.Diamonds,
-            Suit.Spades
-        };
-
         public Deck()
         {
-            for (var i = 0; i < 13; i++)
+            for (var i = 1; i < 14; i++)
             {
                 foreach (var suit in suits)
                 {
@@ -63,11 +55,20 @@ namespace GoFish.Business
         }
 
 
-        void Swap(int a, int b)
+        private void Swap(int a, int b)
         {
             var temp = this[a];
             this[a] = this[b];
             this[b] = temp;
         }
+
+
+        private readonly Suit[] suits =
+        {
+            Suit.Hearts,
+            Suit.Clubs,
+            Suit.Diamonds,
+            Suit.Spades
+        };
     }
 }

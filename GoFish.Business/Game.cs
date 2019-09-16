@@ -1,243 +1,250 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 
 namespace GoFish.Business
 {
     public class Game
     {
-        readonly ICommunicator Communicator;
-        readonly Deck Deck = new Deck();
-        readonly Player AI = new Player();
-        readonly Player Player = new Player();
-
-        public Game(ICommunicator comm)
+        public Game(IDisplayAdapter display)
         {
-            Communicator = comm;
+            _display = display;
+            _display.PlayerRequestsRank += OnRequestRank;
+            _display.PlayerDraws += OnPlayerDraw;
+            _display.CardsReturned += OnCardsReturned;
+            _display.StartNewGame += OnNewGame;
+            _tokenSource = new CancellationTokenSource();
         }
 
 
-        public void Start()
+        public async Task StartGame(CancellationToken? token = null)
         {
-            Communicator.Write("Let's play Go Fish!");
-            Communicator.Write("Type the letter 's' to shuffle the deck.");
-            if (Communicator.Read()?.ToLower() == "s")
+            if (token == null)
             {
-                Communicator.Write("Shuffling...");
-                Deck.Shuffle();
-                Communicator.Write("");
-                Deck.Deal(new List<Player>{Player, AI}, 7);
-
-                while (Player.Hand.Count > 0 || AI.Hand.Count > 0 && Deck.Count > 0)
-                {
-                    ShowHand();
-                    Guess();
-                    AIGuess();
-                }
-
-                GameOver();
+                token = _tokenSource.Token;
             }
-        }
-        
-        
-        void ShowHand()
-        {
-            Communicator.Write("Here is your hand:");
-            foreach (var card in Player.Hand)
-            {
-                Communicator.Write($" - {card.Rank} of {card.Suit}");
-            }
+            
+            _player = new Player();
+            _ai = new Player();
+            await _display.StartGame();
+            _deck.Shuffle();
+            await _display.Shuffle();
+
+            _deck.Deal(new List<Player> {_player, _ai}, 7);
+            await BeginGameLoop(token.Value);
         }
 
 
-        void Guess()
+        private async Task BeginGameLoop(CancellationToken token)
         {
-            if (Player.Hand.Count == 0)
+            while (!token.IsCancellationRequested)
             {
-                Communicator.Write("No cards, you must draw this turn!");
-                Deck.Draw(Player);
-                return;
+                await _display.DrawTable(new[] {_player}, new[] {_ai});
+                await _display.PlayersTurn();
+                await WaitForPlayerResponse(token);
+                await _display.DrawTable(new[] {_player}, new[] {_ai});
+                await AiGuess();
+                await WaitForPlayerResponse(token);
             }
-            
-            Communicator.Write("");
-            Communicator.Write("Ask me if I have a card...");
-            Communicator.Write("(e.g., Ace, Two, Three, Four, King...)");
-            var guess = Communicator.Read();
+        }
 
-            while (Player.Hand.All(c => c.Rank.ToString().ToLower() != guess?.ToLower()))
+
+        private Task WaitForPlayerResponse(CancellationToken token)
+        {
+            while (!_playerTurnComplete && !token.IsCancellationRequested)
             {
-                Communicator.Write("You may only guess card numbers that you already have.");
-                Communicator.Write("Ask me if I have a card...");
-                guess = Communicator.Read();
+                Thread.Sleep(500);
             }
-            
-            Communicator.Write("");
-            var cards = FindCards(guess, AI);
-            
-            if (cards != null)
+
+            _playerTurnComplete = false;
+            return Task.CompletedTask;
+        }
+
+
+        private async void OnNewGame(object sender, EventArgs e)
+        {
+            _tokenSource.Cancel();
+            await StartGame(_tokenSource.Token);
+        }
+
+
+        private void OnPlayerDraw(object sender, MessageEventArgs e)
+        {
+            if (e.Message == "You")
             {
-                var message = $"You got {cards.Count} {cards.First().Rank}!";
-                if (cards.Count > 1)
-                {
-                    message = $"You got {cards.Count} {cards.First().PluralName}!";
-                }
-                Communicator.Write(message);
-                
-                Player.Hand.AddRange(cards);
-                foreach (var c in cards)
-                {
-                    AI.Hand.Remove(c);
-                }
-                LayoutSets(Player);
-                Guess();
+                DrawCard(_player);
             }
             else
             {
-                Communicator.Write("No! Go Fish!");
-                Thread.Sleep(1000);
-                Deck.Draw(Player);
-                var newCard = Player.Hand.Last();
-                Communicator.Write($"You drew the {newCard.Rank} of {newCard.Suit}");
-                LayoutSets(Player);
+                DrawCard(_ai);   
             }
         }
 
 
-        void AIGuess()
+        private async void OnRequestRank(object sender, RankEventArgs e)
         {
-            if (AI.Hand.Count == 0)
+            if (!_player.Hand.Any(c => c.Rank.Equals(e.RankRequested)))
             {
-                Communicator.Write("No cards, I must draw this turn!");
-                Deck.Draw(AI);
+                await _display.InvalidCardRequest();
+                await _display.PlayersTurn();
+                
                 return;
             }
+
+            var foundCards = FindCards(e.RankRequested, _ai);
+            if (foundCards == null)
+            {
+                await _display.MustDraw("You");
+                return;
+            }
+
+            _player.Hand.AddRange(foundCards);
+            foreach (var c in foundCards)
+            {
+                _ai.Hand.Remove(c);
+            }
+
+            await _display.CardsFound(foundCards.ToArray(), "You");
+            LayoutSets(_player);
+            if (!_deck.Any() || !_player.Hand.Any())
+            {
+                await GameOver();
+                return;
+            }
+
+            await _display.DrawTable(new[] {_player}, new[] {_ai});
+            await _display.PlayersTurn();
             
+        }
+
+
+        private async void DrawCard(Player p)
+        {
+            _deck.Draw(p);
+            var newCard = p.Hand.Last();
+            await _display.CardsFound(new[] {newCard}, p == _player ? "You": "I");
+            LayoutSets(p);
+            if (!_deck.Any() || !p.Hand.Any())
+            {
+                await GameOver();
+                return;
+            }
+
+            await _display.DrawTable(new[] {_player}, new[] {_ai});
+
+            _playerTurnComplete = true;
+        }
+
+
+        private async Task AiGuess()
+        {
             var randomGenerator = new Random();
 
-            var guessCard = AI.Hand[randomGenerator.Next(0, AI.Hand.Count - 1)];
-            
-            Communicator.Write("My turn.");
-            
-            Communicator.Write($"Do you have any {guessCard.PluralName}?");
-            Thread.Sleep(2000);
-            Communicator.Write("");
-            var cards = FindCards(guessCard.Rank.ToString(), Player);
-            
-            if (cards != null)
-            {
-                if (cards.Count == 1)
-                {
-                    Communicator.Write($"Yes? I'll take that {guessCard.Rank}!");
-                }
-                else
-                {
-                    Communicator.Write($"Yes? I'll take those {guessCard.PluralName}!");
-                }
-                
-                AI.Hand.AddRange(cards);
-                foreach (var c in cards)
-                {
-                    Player.Hand.Remove(c);
-                }
-                LayoutSets(AI);
-                AIGuess();
-            }
-            else
-            {
-                Communicator.Write("No? I have to draw...");
-                Thread.Sleep(1000);
-                Deck.Draw(AI);
-                LayoutSets(AI);
-            }
+            _guessRank = _ai.Hand[randomGenerator.Next(0, _ai.Hand.Count - 1)].Rank;
+
+            await Task.Run(async () => { await _display.AIsTurn(_guessRank); });
         }
 
 
-        static List<Card> FindCards(string guess, Player p)
+        private async void OnCardsReturned(object sender, MessageEventArgs e)
         {
-            var cardGuess = guess.Trim().ToLower();
-
-            if (p.Hand.Any(c => c.Rank.ToString().ToLower() == cardGuess))
+            var foundCards = FindCards(_guessRank, _player);
+            if (e.Message?.ToLowerInvariant() == "no" && foundCards != null && foundCards.Any())
             {
-                return p.Hand.Where(c => c.Rank.ToString().ToLower() == cardGuess).ToList();
+                await _display.InvalidCardReturn();
+                return;
             }
-           
+            if (foundCards == null || foundCards.Count == 0)
+            {
+                await _display.MustDraw("I");
+                return;
+            }
+
+            _ai.Hand.AddRange(foundCards);
+            foreach (var c in foundCards)
+            {
+                _player.Hand.Remove(c);
+            }
+
+            await _display.CardsFound(foundCards.ToArray(), "I");
+
+            if (!_deck.Any() || !_ai.Hand.Any())
+            {
+                await GameOver();
+                return;
+            }
+
+            await _display.DrawTable(new[] {_player}, new[] {_ai});
+            await AiGuess();
+        }
+
+
+        private static List<Card> FindCards(Rank rank, Player p)
+        {
+            if (p.Hand.Any(c => c.Rank.Equals(rank)))
+            {
+                return p.Hand.Where(c => c.Rank.Equals(rank)).ToList();
+            }
+
             return null;
         }
-        
-        
-        void LayoutSets(Player p)
+
+
+        private static void LayoutSets(Player p)
         {
-            Communicator.Write("");
-            
             var numberGroups = p.Hand.GroupBy(c => c.Rank);
             foreach (var numberGroup in numberGroups)
             {
-                if (numberGroup.Count() == 4)
+                if (numberGroup.Count() != 4)
                 {
-                    var numberCards = numberGroup.ToList();
-                    p.Sets.Add(numberCards);
-                    foreach (var c in numberCards)
-                    {
-                        p.Hand.Remove(c);
-                    }
+                    continue;
+                }
+
+                var numberCards = numberGroup.ToList();
+                p.Sets.Add(numberCards);
+                foreach (var c in numberCards)
+                {
+                    p.Hand.Remove(c);
                 }
             }
-            
-            if (p.Sets.Count == 0)
-            {
-                return;
-            }
-
-            ShowSets(p);
         }
 
 
-        void ShowSets(Player p)
+        private async Task GameOver()
         {
-            if (p == Player)
-            {
-                Communicator.Write("You have these sets:");
-            }
-            else
-            {
-                Communicator.Write("I have these sets:");
-            }
-            
-            foreach (var set in p.Sets)
-            {
-                Communicator.Write($" - {set.First().PluralName}");
-            }
-
-            if (p == Player)
-            {
-                ShowHand();
-            }
-        }
-
-
-        void GameOver()
-        {
-            Communicator.Write("Game Over!");
+            var sb = new StringBuilder("Game Over!");
             var playerPoints = 0;
-            Player.Sets.ForEach(set => playerPoints += set.Count);
-            Communicator.Write($"Your score is {playerPoints}");
+            _player.Sets.ForEach(set => playerPoints += set.Count);
+            sb.AppendLine($"Your score is {playerPoints}");
             var aiPoints = 0;
-            AI.Sets.ForEach(set => aiPoints += set.Count);
-            Communicator.Write($"My score is {aiPoints}");
+            _ai.Sets.ForEach(set => aiPoints += set.Count);
+            sb.AppendLine($"My score is {aiPoints}");
             if (playerPoints > aiPoints)
             {
-                Communicator.Write("You Win!");
+                sb.AppendLine("You Win!");
             }
             else if (aiPoints > playerPoints)
             {
-                Communicator.Write("I Win!");
+                sb.AppendLine("I Win!");
             }
             else
             {
-                Communicator.Write("Tie Game!");
+                sb.AppendLine("Tie Game!");
             }
+
+            await _display.EndGame(sb.ToString());
         }
+
+        private readonly CancellationTokenSource _tokenSource;
+        private readonly Deck _deck = new Deck();
+        private readonly IDisplayAdapter _display;
+        private Player _ai = new Player();
+        private Rank _guessRank;
+        private Player _player = new Player();
+        private bool _playerTurnComplete;
     }
 }
