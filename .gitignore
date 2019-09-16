@@ -2,7 +2,8 @@
 # Default ignored files
 /.idea/
 /.vs/
-/.idea/.idea.GoFish/
+[Bb]in/
+[Oo]bj/
 /GoFish.Business/bin/
 /GoFish.Business/obj/
 /GoFish.Console/bin/
