@@ -1,0 +1,12 @@
+@using GoFish.Business
+@using Microsoft.AspNetCore.Components
+<div style="border: 1px solid black; border-radius: 25px; height: 100px; width: 50px;">
+    <p>@CardInfo.Rank</p>
+    <p>@CardInfo.Suit</p>
+</div>
+
+@code {
+
+    [Parameter]
+    public Card CardInfo { get; set; }
+}
